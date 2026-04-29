@@ -1,0 +1,49 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.zebra.rfid.demo.sdksample.MainActivity">
+
+    <group android:id="@+id/main_actions">
+        <item
+            android:textColor="@color/colorAccent"
+            android:id="@+id/Connect"
+            android:title="@string/Connect"
+            app:showAsAction="never" />
+
+        <item
+            android:textColor="@color/colorAccent"
+            android:id="@+id/Disconnect"
+            android:title="@string/Disconnect"
+            app:showAsAction="never" />
+    </group>
+
+    <group android:id="@+id/test_actions">
+        <item
+            android:textColor="@color/colorAccent"
+            android:id="@+id/TestConnectDisconectLoop"
+            android:title="@string/TestConnectDisconectLoop"
+            app:showAsAction="never" />
+        <item
+            android:textColor="@color/colorAccent"
+            android:id="@+id/SetPrefitlerTID_S0_INVB"
+            android:title="@string/SetPrefitlerTID_S0_INVB"
+            app:showAsAction="never" />
+        <item
+            android:textColor="@color/colorAccent"
+            android:id="@+id/ClearPrefitler"
+            android:title="@string/ClearPrefitler"
+            app:showAsAction="never" />
+        <item
+            android:textColor="@color/colorAccent"
+            android:id="@+id/ResetPCto3000"
+            android:title="@string/ResetPCto3000"
+            app:showAsAction="never" />
+
+        <item
+            android:textColor="@color/colorAccent"
+            android:id="@+id/Clear_List"
+            android:title="@string/Clear_List"
+            app:showAsAction="never" />
+
+    </group>
+</menu>

@@ -1,0 +1,14 @@
+flowchart TD
+    A([createInstance]) --> B[readers = Readers context\nENUM_TRANSPORT.ALL]
+    B --> C[Readers.attach eventHandler]
+    C --> D[SDK scans ALL transports\nUSB + Bluetooth + Serial]
+    D --> E[GetAvailableRFIDReaderList]
+    E --> F{Single reader\nin list?}
+    F -- Yes --> G[Use it directly]
+    F -- No --> H{Name contains\n-G or RFID or\nTC22R or TC27R?}
+    H -- Yes --> I[Select matched reader\nLog: Found eConnex-USB-CIO]
+    H -- No --> J[Skip + Log: Ignore non-eConnex]
+    J --> H
+    G --> K[reader = readerDevice.rfidReader]
+    I --> K
+    K --> L([connectReader called])

@@ -1,0 +1,30 @@
+flowchart TD
+    A([Disconnect Triggered]) --> B{Trigger Source}
+    B --> C[Manual: Disconnect menu]
+    B --> D[Lifecycle: onDestroy owner]
+    B --> E[USB Detach BroadcastReceiver]
+    B --> F[SDK: DISCONNECTION_EVENT]
+    B --> G[Stress Test: onDestroy silent=true]
+
+    C --> H[onDestroy silent=false]
+    D --> I[lifecycle.removeObserver\nonDestroy false]
+    E --> J[rfidHandler.onDestroy\nrfidHandler = null]
+    F --> K[reader.disconnect\nupdateState DISCONNECTED]
+    G --> L[onDestroy silent=true]
+
+    H --> M[dispose silent=false]
+    I --> M
+    J --> M
+    L --> N[dispose silent=true]
+
+    M --> O[updateState DISCONNECTED]
+    N --> O
+    O --> P{reader.isConnected?}
+    P -- Yes --> Q{silent?}
+    Q -- No --> R[reader.disconnect\nToast: Disconnected]
+    Q -- Yes --> S[reader.disconnect\nno toast]
+    P -- No --> T
+    R --> T[readers.Dispose\nreaders=null\nreader=null\nbInit=false]
+    S --> T
+    T --> U[executor.shutdownNow]
+    U --> Z([Fully Disconnected])

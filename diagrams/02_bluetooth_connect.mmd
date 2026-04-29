@@ -1,0 +1,16 @@
+flowchart TD
+    A([MainActivity.onCreate]) --> B{Android 12+?}
+    B -- No --> C[InitRfidSDK]
+    B -- Yes --> D{BLUETOOTH_CONNECT\npermission granted?}
+    D -- Yes --> C
+    D -- No --> E[requestPermissions\nBLUETOOTH_SCAN +\nBLUETOOTH_CONNECT]
+    E --> F{Permission\nResult}
+    F -- Granted --> C
+    F -- Denied --> G([Toast: Permissions\nnot granted])
+    C --> H[RFIDHandler created\nENUM_TRANSPORT.ALL]
+    H --> I[SDK discovers BT readers\nGetAvailableRFIDReaderList]
+    I --> J{Reader found?}
+    J -- No --> K([updateState ERROR])
+    J -- Yes --> L[reader.connect\nrecord lAPIConnectTime]
+    L --> M[configureReader\nEvents enabled]
+    M --> N([updateState CONNECTED\nbeep + toast])

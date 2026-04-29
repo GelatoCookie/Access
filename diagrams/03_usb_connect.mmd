@@ -1,0 +1,17 @@
+flowchart TD
+    A([USB Cable Plugged In]) --> B[OS fires USB_DEVICE_ATTACHED]
+    B --> C{BroadcastReceiver\nvendorId == 1504?}
+    C -- No --> D([Ignore device])
+    C -- Yes --> E[InitRfidSDK]
+    E --> F[createInstance\nreaders = Readers ENUM_TRANSPORT.ALL\nReaders.attach]
+    F --> G[RFIDReaderAppeared callback]
+    G --> H[beep + Toast\nconnectReader]
+    H --> I[getAvailableReader\nselects -G / RFID / TC22R / TC27R]
+    I --> J[connectMethod\nreader.connect\nrecord lAPIConnectTime]
+    J --> K[configureReader]
+    K --> L([updateState CONNECTED])
+
+    M([USB Cable Unplugged]) --> N[OS fires USB_DEVICE_DETACHED]
+    N --> O[BroadcastReceiver\nrfidHandler.onDestroy\nrfidHandler = null]
+    O --> P[dispose\nreader.disconnect\nreaders.Dispose]
+    P --> Q([updateState DISCONNECTED])

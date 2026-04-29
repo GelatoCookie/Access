@@ -1,0 +1,20 @@
+# Build artifacts
+build/
+**/build/
+.gradle/
+bin/
+gen/
+out/
+
+# Android Studio / IDE
+*.iml
+.idea/
+/local.properties
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
+
+# Other
+*.patch
+*.log

@@ -1,0 +1,17 @@
+flowchart TD
+    A([App Launch / InitRfidSDK]) --> B{rfidHandler\nnot null?}
+    B -- Yes --> C[rfidHandler.onDestroy\nrfidHandler = null]
+    C --> D[Create new RFIDHandler]
+    B -- No --> D
+    D --> E[rfidHandler.onCreate activity]
+    E --> F[Store context + textView\nlifecycle.addObserver on UI thread]
+    F --> G[initSDK]
+    G --> H{bInit AND\nreaders != null?}
+    H -- Yes --> I[connectReader]
+    H -- No --> J[Set bInit=true\nRe-create executor if shutdown]
+    J --> K{readers == null?}
+    K -- Yes --> L[updateState CONNECTING\nSleep 1s\ncreateInstance]
+    L --> M[readers = Readers ENUM_TRANSPORT.ALL\nReaders.attach this]
+    M --> I
+    K -- No --> I
+    I --> Z([SDK Ready])

@@ -1,0 +1,21 @@
+flowchart TD
+    A([connectReader]) --> B{isReaderConnected?}
+    B -- Yes --> Z([Already connected])
+    B -- No --> C{executor shutdown?}
+    C -- Yes --> D[Re-create\nSingleThreadExecutor]
+    D --> E
+    C -- No --> E[Submit background task]
+    E --> F{isReaderConnected?\ndouble-check in task}
+    F -- Yes --> Z
+    F -- No --> G[updateState CONNECTING]
+    G --> H[getAvailableReader]
+    H --> I{reader != null?}
+    I -- No --> J([Log: Failed\nupdateState ERROR])
+    I -- Yes --> K[connectMethod]
+    K --> L{r.isConnected\nalready?}
+    L -- Yes --> M([updateState CONNECTED])
+    L -- No --> N[lStart = currentTimeMillis\nr.connect\nlAPIConnectTime = elapsed]
+    N --> O[configureReader\naddEventsListener\nsetHandheldEvent true\nsetTagReadEvent true\nsetReaderDisconnectEvent true]
+    O --> P{r.isConnected\nafter connect?}
+    P -- Yes --> Q([updateState CONNECTED\nToast: Connected Xms\nbeep])
+    P -- No --> R([updateState ERROR])

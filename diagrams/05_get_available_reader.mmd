@@ -1,0 +1,17 @@
+flowchart TD
+    A([getAvailableReader]) --> B[Reset readerDevice = null\nreader = null]
+    B --> C{readers != null?}
+    C -- No --> Z([reader remains null])
+    C -- Yes --> D[availableRFIDReaderList =\nGetAvailableRFIDReaderList]
+    D --> E{list not null\nAND size > 0?}
+    E -- No --> F[Log: No available readers\nupdateState ERROR]
+    F --> Z
+    E -- Yes --> G{list.size == 1?}
+    G -- Yes --> H[readerDevice = list 0]
+    G -- No --> I{device.name contains\n-G or RFID or\nTC27R or TC22R?}
+    I -- Yes --> J[readerDevice = device\nLog: Found eConnex-USB-CIO\nbreak loop]
+    I -- No --> K[Log: Ignore non-eConnex\nnext device]
+    K --> I
+    H --> L[reader = readerDevice.rfidReader]
+    J --> L
+    L --> Z2([reader reference set])

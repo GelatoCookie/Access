@@ -1,0 +1,27 @@
+flowchart TD
+    A([Interface Change Event]) --> B{Event Source}
+    B --> C[USB DETACH\nBroadcastReceiver]
+    B --> D[SDK: RFIDReaderDisappeared]
+    B --> E[SDK: DISCONNECTION_EVENT]
+
+    C --> F[rfidHandler.onDestroy\nrfidHandler = null]
+    D --> G[Toast RFIDReaderDisappeared\nupdateState DISCONNECTED]
+    E --> H[reader.disconnect\nupdateState DISCONNECTED]
+
+    F --> I([DISCONNECTED State])
+    G --> I
+    H --> I
+
+    I --> J{New Interface\nArrives}
+    J --> K[USB ATTACH\nvendorId == 1504\nInitRfidSDK]
+    J --> L[SDK: RFIDReaderAppeared\nbeep + connectReader]
+    J --> M[Activity onResume\nconnectReader]
+
+    K --> N[New RFIDHandler\nENUM_TRANSPORT.ALL\ncreateInstance]
+    N --> O
+    L --> O[getAvailableReader\nselects new interface by name]
+    M --> O
+
+    O --> P[connectMethod\nreader.connect\nlAPIConnectTime recorded]
+    P --> Q[configureReader\nEvents re-registered on new reader]
+    Q --> R([updateState CONNECTED\nNew interface active])
