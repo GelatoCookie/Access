@@ -412,6 +412,60 @@ class MainActivity : AppCompatActivity(), RFIDHandler.ResponseHandlerInterface {
         }
     }
 
+    private fun buildTidFilterHex(rawTid: String): String {
+        val hexOnly = rawTid
+            .replace(" ", "")
+            .uppercase(Locale.US)
+            .filter { it in "0123456789ABCDEF" }
+
+        // 32 hex chars = 128 bits
+        return if (hexOnly.length > 32) hexOnly.substring(0, 32) else hexOnly
+    }
+
+    private fun writeWithTidPrefilter(
+        targetTagId: String,
+        data: String,
+        selectedBank: MEMORY_BANK,
+        offset: Int,
+        tidWordCount: Int = 8
+    ) {
+        val handler = rfidHandler
+        if (handler == null) {
+            sendToast("RFID handler unavailable")
+            return
+        }
+
+        if (targetTagId.isBlank()) {
+            sendToast("Tag ID is empty")
+            return
+        }
+
+        if (data.isBlank() || data.length % 4 != 0) {
+            sendToast("Write data must be hex and length multiple of 4")
+            return
+        }
+
+        handler.write(targetTagId, data, selectedBank, offset)
+
+//        handler.read(targetTagId, MEMORY_BANK.MEMORY_BANK_TID, 0, tidWordCount) { tid ->
+//            if (tid.isNullOrBlank()) {
+//                sendToast("Read TID failed")
+//                return@read
+//            }
+//
+//            val tidFilter = buildTidFilterHex(tid)
+//            if (tidFilter.isBlank()) {
+//                sendToast("Invalid TID for prefilter")
+//                return@read
+//            }
+//
+//            sendToast("TID prefilter applied, writing tag...")
+//            handler.setSingulationForFilter(true)
+//            handler.applyTagFilter(tidFilter)
+//            handler.write(targetTagId, data, selectedBank, offset)
+//        }
+    }
+
     private fun showWriteDialog(tagId: String) {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -475,9 +529,9 @@ class MainActivity : AppCompatActivity(), RFIDHandler.ResponseHandlerInterface {
         layout.addView(btnReadTid)
 
         AlertDialog.Builder(this)
-            .setTitle("Write Tag Data")
+            .setTitle("Write Tag Data (TID Prefilter)")
             .setView(layout)
-            .setPositiveButton("Write") { _, _ ->
+            .setPositiveButton("Write with TID Filter") { _, _ ->
                 val targetTagId = etTagId.text.toString()
                 val data = etData.text.toString()
                 val offset = etOffset.text.toString().toIntOrNull() ?: 2
@@ -488,7 +542,7 @@ class MainActivity : AppCompatActivity(), RFIDHandler.ResponseHandlerInterface {
                     "RESERVED" -> MEMORY_BANK.MEMORY_BANK_RESERVED
                     else -> MEMORY_BANK.MEMORY_BANK_EPC
                 }
-                rfidHandler?.write(targetTagId, data, selectedBank, offset)
+                writeWithTidPrefilter(targetTagId, data, selectedBank, offset)
             }
             .setNegativeButton("Cancel", null)
             .show()

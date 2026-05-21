@@ -491,8 +491,14 @@ class RFIDHandler : Readers.RFIDReaderEventHandler, DefaultLifecycleObserver {
             }
 
             try {
-                reader?.Actions?.TagAccess?.writeWait(selectTagID, writeAccessParams, null, tagData)
-                context?.sendToast("Write Successful")
+                val effectiveTagID = if (selectTagID.isEmpty()) null else selectTagID
+                reader?.Actions?.TagAccess?.writeWait(effectiveTagID, writeAccessParams, null, tagData)
+                if (writeAccessParams.writeDataLength == tagData.numberOfWords) {
+                    context?.sendToast("Write Successful for lengh=" + tagData.numberOfWords)
+                }
+                else{
+                    context?.sendToast("Partial Write for lengh=" + tagData.numberOfWords)
+                }
             } catch (e: OperationFailureException) {
                 Log.e(TAG, "Write failed: ${e.vendorMessage} ${e.results}", e)
                 context?.sendToast("Write failed: ${e.vendorMessage} ${e.results}")
@@ -528,7 +534,10 @@ class RFIDHandler : Readers.RFIDReaderEventHandler, DefaultLifecycleObserver {
             }
 
             try {
-                val tagData = reader?.Actions?.TagAccess?.readWait(selectTagID, readAccessParams, null)
+                Log.d(TAG, "Start readWait for tagEPC=$selectTagID, bank=${readAccessParams.memoryBank}, offset=$wordOffSet, wordCount=${readAccessParams.count}")
+                // Set useInventoryFilter to true to respect Pre-Filters and Singulation settings (e.g., Session S0, State B)
+                val effectiveTagID = if (selectTagID.isEmpty()) null else selectTagID
+                val tagData = reader?.Actions?.TagAccess?.readWait(effectiveTagID, readAccessParams, null, true)
                 val result = tagData?.memoryBankData
                 context?.runOnUiThread { callback(result) }
             } catch (e: OperationFailureException) {
