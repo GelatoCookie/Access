@@ -6,78 +6,6 @@ This document is rewritten to match the exact current implementation in:
 - app/src/main/java/com/zebra/rfid/demo/sdksample/RFIDHandler.kt
 - app/src/main/java/com/zebra/rfid/demo/sdksample/MainActivity.kt
 
-## Actual Runtime Behavior (Current)
-
-1. The write dialog button label says "Write with TID Filter".
-2. Current `writeWithTidPrefilter(...)` directly calls `handler.write(...)`.
-3. The TID-prefilter read/apply/write block in `writeWithTidPrefilter(...)` is currently commented out.
-4. `RFIDHandler.write(...)` and `RFIDHandler.read(...)` both support empty tag ID by converting to `effectiveTagID = null`.
-5. `RFIDHandler.read(...)` uses `readWait(..., true)` so inventory filter/singulation can be respected.
-
-## MainActivity Exact Methods
-
-### buildTidFilterHex
-
-```kotlin
-private fun buildTidFilterHex(rawTid: String): String {
-    val hexOnly = rawTid
-        .replace(" ", "")
-        .uppercase(Locale.US)
-        .filter { it in "0123456789ABCDEF" }
-
-    // 32 hex chars = 128 bits
-    return if (hexOnly.length > 32) hexOnly.substring(0, 32) else hexOnly
-}
-```
-
-### writeWithTidPrefilter (exact current code)
-
-```kotlin
-private fun writeWithTidPrefilter(
-    targetTagId: String,
-    data: String,
-    selectedBank: MEMORY_BANK,
-    offset: Int,
-    tidWordCount: Int = 8
-) {
-    val handler = rfidHandler
-    if (handler == null) {
-        sendToast("RFID handler unavailable")
-        return
-    }
-
-    if (targetTagId.isBlank()) {
-        sendToast("Tag ID is empty")
-        return
-    }
-
-    if (data.isBlank() || data.length % 4 != 0) {
-        sendToast("Write data must be hex and length multiple of 4")
-        return
-    }
-
-    handler.write(targetTagId, data, selectedBank, offset)
-
-//        handler.read(targetTagId, MEMORY_BANK.MEMORY_BANK_TID, 0, tidWordCount) { tid ->
-//            if (tid.isNullOrBlank()) {
-//                sendToast("Read TID failed")
-//                return@read
-//            }
-//
-//            val tidFilter = buildTidFilterHex(tid)
-//            if (tidFilter.isBlank()) {
-//                sendToast("Invalid TID for prefilter")
-//                return@read
-//            }
-//
-//            sendToast("TID prefilter applied, writing tag...")
-//            handler.setSingulationForFilter(true)
-//            handler.applyTagFilter(tidFilter)
-//            handler.write(targetTagId, data, selectedBank, offset)
-//        }
-}
-```
-
 ## RFIDHandler Exact Methods
 
 ### applyTagFilter
@@ -261,9 +189,3 @@ public fun read(selectTagID: String, bank: MEMORY_BANK, wordOffSet: Int, wordCou
     }
 }
 ```
-
-## Notes
-
-- The exact code currently keeps prefilter write flow disabled in `writeWithTidPrefilter(...)` via comments.
-- The label "Write with TID Filter" is present in UI, but direct write is what currently executes.
-- TID filtering APIs exist and are implemented in `RFIDHandler`, ready to be re-enabled from `MainActivity` when needed.
